@@ -17,10 +17,13 @@ func main() {
 
 	fmt.Println(conf)
 
-	logger, err := logger.Init(conf)
+	slogger := logger.NewSLogger()
+	fileLogger, err := logger.NewFLogger(conf.AppLogfile)
 	if err != nil {
-		log.Fatalf("logger error: %v\n", err)
+		slogger.Error("Ошибка создания FileLogger", "error", err)
 	}
-	logger.Info("info: program started")
+	defer fileLogger.Close()
 
+	logger := logger.NewCombinedLogger(slogger, fileLogger)
+	logger.Info("program started")
 }
