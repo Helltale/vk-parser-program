@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/Helltale/vk-parser-program/config"
+	"github.com/Helltale/vk-parser-program/internal/flags"
 	"github.com/Helltale/vk-parser-program/internal/logger"
 )
 
@@ -26,4 +27,8 @@ func main() {
 
 	logger := logger.NewCombinedLogger(slogger, fileLogger)
 	logger.Info("program started")
+
+	flagEntry := flags.FlagHandler(logger)
+
+	fmt.Println(flagEntry)
 }
