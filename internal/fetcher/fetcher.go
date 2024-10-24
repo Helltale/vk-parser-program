@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/Helltale/vk-parser-program/config"
-	"github.com/Helltale/vk-parser-program/internal/flags"
 	"github.com/Helltale/vk-parser-program/internal/logger"
 )
 
@@ -15,26 +14,26 @@ type Fetcher interface {
 	Fetch()
 }
 
-func Init(flagEntry *flags.Entry, conf *config.Config, logger *logger.CombinedLogger) (map[string]interface{}, error) {
-	switch flagEntry.Flag {
+func Init(flag string, value string, conf *config.Config, logger *logger.CombinedLogger) (map[string]interface{}, error) {
+	switch flag {
 	case "user":
-		user := NewUser(flagEntry.Value, "")
+		user := NewUser(value, "")
 		url := user.CreateLink(conf.ApiToken, conf.ApiVersion)
 		// fmt.Println(url)
 		user.Fetch(url, logger)
 
-		logger.Info("fetcher init get responce", "switch-case", "user", "flag", flagEntry.Flag, "value", flagEntry.Value)
+		logger.Info("fetcher init get responce", "switch-case", "user", "flag", flag, "value", value)
 
 		return user.user_responce, nil
 	case "wall":
 
 	default:
 
-		logger.Error("fetcher init error", "switch-case", "default", "flag", flagEntry.Flag, "value", flagEntry.Value)
+		logger.Error("fetcher init error", "switch-case", "default", "flag", flag, "value", value)
 		return nil, fmt.Errorf("fetcher init error: switch-case - default")
 	}
 
-	logger.Error("fetcher init error", "switch-case", "none", "flag", flagEntry.Flag, "value", flagEntry.Value)
+	logger.Error("fetcher init error", "switch-case", "none", "flag", flag, "value", value)
 	return nil, fmt.Errorf("fetcher init error: switch-case - none")
 
 }

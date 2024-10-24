@@ -8,17 +8,19 @@ import (
 )
 
 type Config struct {
-	ApiToken   string `yaml:"api-token"`
-	ApiVersion string `yaml:"api-version"`
-	AppLogfile string `yaml:"app_logfile"`
-	AppResDir  string `yaml:"app_resdir"`
-	AppHost    string `yaml:"app_host"`
-	AppPort    string `yaml:"app_port"`
-	DbHost     string `yaml:"db_host"`
-	DbPort     string `yaml:"db_port"`
-	DbUser     string `yaml:"db_user"`
-	DbPassword string `yaml:"db_password"`
-	DbName     string `yaml:"db_name"`
+	ApiToken                string `yaml:"api-token"`
+	ApiVersion              string `yaml:"api-version"`
+	AppLogfile              string `yaml:"app_logfile"`
+	AppResDir               string `yaml:"app_resdir"`
+	AppHost                 string `yaml:"app_host"`
+	AppPort                 string `yaml:"app_port"`
+	DbHost                  string `yaml:"db_host"`
+	DbPort                  string `yaml:"db_port"`
+	DbUser                  string `yaml:"db_user"`
+	DbPassword              string `yaml:"db_password"`
+	DbName                  string `yaml:"db_name"`
+	AppMaxResponceToVkToSec uint8  `yaml:"app_maxresponcetovktosec"`
+	AppMaxGoroutine         uint8  `yaml:"app_maxgoroutine"`
 }
 
 func NewConfig() (*Config, error) {
