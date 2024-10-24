@@ -19,8 +19,6 @@ func main() {
 		log.Fatalf("config error: %v\n", err)
 	}
 
-	fmt.Println(conf)
-
 	slogger := logger.NewSLogger()
 	fileLogger, err := logger.NewFLogger(conf.AppLogfile)
 	if err != nil {
@@ -31,14 +29,20 @@ func main() {
 	logger := logger.NewCombinedLogger(slogger, fileLogger)
 	logger.Info("program started")
 
-	flagEntry := flags.FlagHandler(logger)
+	flagManager := flags.NewFlagManager()
+	flagEntry := flagManager.FlagHandler(logger)
 
-	response, err := fetcher.Init(flagEntry, conf, logger)
+	response, err := fetcher.Init(
+		flagEntry.Flag,
+		flagEntry.Value[0], //заглушка
+		conf,
+		logger,
+	)
 	if err != nil {
 		os.Exit(1)
 	}
 
 	if err := fetcher.SaveResponseToJSON(response, filepath.Join(conf.AppResDir, fmt.Sprintf("%s_%s_response.json", flagEntry.Flag, flagEntry.Value))); err != nil {
-		logger.Error("Ошибка сохранения ответа в JSON", "error", err)
+		logger.Error("error saving json", "flag", flagEntry.Flag, "value", flagEntry.Value, "error", err)
 	}
 }
