@@ -8,8 +8,10 @@ import (
 )
 
 type Config struct {
-	VkToken    string `yaml:"vk_token"`
+	ApiToken   string `yaml:"api-token"`
+	ApiVersion string `yaml:"api-version"`
 	AppLogfile string `yaml:"app_logfile"`
+	AppResDir  string `yaml:"app_resdir"`
 	AppHost    string `yaml:"app_host"`
 	AppPort    string `yaml:"app_port"`
 	DbHost     string `yaml:"db_host"`

@@ -3,8 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/Helltale/vk-parser-program/config"
+	"github.com/Helltale/vk-parser-program/internal/fetcher"
 	"github.com/Helltale/vk-parser-program/internal/flags"
 	"github.com/Helltale/vk-parser-program/internal/logger"
 )
@@ -30,5 +33,12 @@ func main() {
 
 	flagEntry := flags.FlagHandler(logger)
 
-	fmt.Println(flagEntry)
+	response, err := fetcher.Init(flagEntry, conf, logger)
+	if err != nil {
+		os.Exit(1)
+	}
+
+	if err := fetcher.SaveResponseToJSON(response, filepath.Join(conf.AppResDir, fmt.Sprintf("%s_%s_response.json", flagEntry.Flag, flagEntry.Value))); err != nil {
+		logger.Error("Ошибка сохранения ответа в JSON", "error", err)
+	}
 }
