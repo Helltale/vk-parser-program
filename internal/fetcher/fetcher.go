@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/Helltale/vk-parser-program/config"
 	"github.com/Helltale/vk-parser-program/internal/logger"
@@ -19,7 +20,6 @@ func Init(flag string, value string, conf *config.Config, logger *logger.Combine
 	case "user":
 		user := NewUser(value, "")
 		url := user.CreateLink(conf.ApiToken, conf.ApiVersion)
-		// fmt.Println(url)
 		user.Fetch(url, logger)
 
 		logger.Info("fetcher init get responce", "switch-case", "user", "flag", flag, "value", value)
@@ -38,8 +38,13 @@ func Init(flag string, value string, conf *config.Config, logger *logger.Combine
 
 }
 
-func SaveResponseToJSON(response map[string]interface{}, filename string) error {
-	file, err := os.Create(filename)
+func SaveResponseToJSON(response map[string]interface{}, path, dir, filename string, logger *logger.CombinedLogger) error {
+
+	if err := directory(path, dir, logger); err != nil {
+		return err
+	}
+
+	file, err := os.Create(filepath.Join(path, dir, filename))
 	if err != nil {
 		return err
 	}
@@ -52,4 +57,19 @@ func SaveResponseToJSON(response map[string]interface{}, filename string) error 
 	}
 
 	return nil
+}
+
+func directory(path, directory string, logger *logger.CombinedLogger) error {
+	dirPath := filepath.Join(path, directory)
+
+	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+		err := os.MkdirAll(dirPath, os.ModePerm)
+		if err != nil {
+			logger.Error("error with create dir", "dir", directory)
+			return err
+		}
+		return nil
+	} else {
+		return nil
+	}
 }

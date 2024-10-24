@@ -1,9 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
-	"path/filepath"
 	"sync"
 	"time"
 
@@ -11,6 +11,10 @@ import (
 	"github.com/Helltale/vk-parser-program/internal/fetcher"
 	"github.com/Helltale/vk-parser-program/internal/flags"
 	"github.com/Helltale/vk-parser-program/internal/logger"
+)
+
+const (
+	TIMEOUT = 10 * time.Second
 )
 
 func main() {
@@ -35,6 +39,9 @@ func main() {
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, conf.AppMaxGoroutine)
 
+	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
+	defer cancel()
+
 	for _, value := range flagEntry.Value {
 		wg.Add(1)
 		sem <- struct{}{}
@@ -43,16 +50,22 @@ func main() {
 			defer wg.Done()
 			defer func() { <-sem }()
 
-			time.Sleep(time.Second / time.Duration(conf.AppMaxResponceToVkToSec))
-
-			response, err := fetcher.Init(flagEntry.Flag, val, conf, logger)
-			if err != nil {
-				logger.Error("error fetching data", "flag", flagEntry.Flag, "value", val, "error", err)
+			select {
+			case <-ctx.Done():
+				logger.Error("context canceled", "flag", flagEntry.Flag, "value", val, "timeout", TIMEOUT, "error", ctx.Err())
 				return
-			}
+			default:
+				time.Sleep(time.Second / time.Duration(conf.AppMaxResponceToVkToSec))
 
-			if err := fetcher.SaveResponseToJSON(response, filepath.Join(conf.AppResDir, fmt.Sprintf("%s_%s_response.json", flagEntry.Flag, val))); err != nil {
-				logger.Error("error saving json", "flag", flagEntry.Flag, "value", val, "error", err)
+				response, err := fetcher.Init(flagEntry.Flag, val, conf, logger)
+				if err != nil {
+					logger.Error("error fetching data", "flag", flagEntry.Flag, "value", val, "error", err)
+					return
+				}
+
+				if err := fetcher.SaveResponseToJSON(response, conf.AppResDir, val, fmt.Sprintf("%s_responce.json", flagEntry.Flag), logger); err != nil {
+					logger.Error("error saving json", "flag", flagEntry.Flag, "value", val, "error", err)
+				}
 			}
 		}(value)
 	}
